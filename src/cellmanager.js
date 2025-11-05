@@ -21,7 +21,8 @@ export default class CellManager {
             'rowmanager',
             'datamanager',
             'keyboard',
-            'footer'
+            'footer',
+            'fireEvent'
         ]);
 
         this.bindEvents();
@@ -209,8 +210,8 @@ export default class CellManager {
     } = {}) {
         if (!$cell) return;
 
-        // don't focus if already editing cell
-        if ($cell === this.$editingCell) return;
+        // don't focus if already editing cell, 没必要了
+        // if ($cell === this.$editingCell) return;
 
         const {
             colIndex,
@@ -654,6 +655,9 @@ export default class CellManager {
             content: value
         });
         this.refreshCell(cell, refreshHtml);
+        //单元格更新事件
+        let row = this.datamanager.getData(rowIndex);
+        this.fireEvent('onCellUpdated', colIndex, rowIndex, value, row);
     }
 
     refreshCell(cell, refreshHtml = false) {
