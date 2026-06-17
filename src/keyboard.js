@@ -14,7 +14,9 @@ const KEYCODES = {
     27: 'esc',
     67: 'c',
     70: 'f',
-    86: 'v'
+    86: 'v',
+    90: 'z',
+    46: 'delete'
 };
 
 export default class Keyboard {

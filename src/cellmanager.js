@@ -1,12 +1,16 @@
 import {
     copyTextToClipboard,
+    blobToImageTag,
+    extractImageFromClipboard,
     makeDataAttributeString,
     throttle,
     linkProperties,
     escapeHTML,
+
 } from './utils';
 import $ from './dom';
 import icons from './icons';
+import getEditor from './editor';
 
 export default class CellManager {
     constructor(instance) {
@@ -36,6 +40,8 @@ export default class CellManager {
         this.bindMouseEvents();
         this.bindWheelEvents();
         this.bindTreeEvents();
+        this.bindClickEventListeners();
+        this.bindKeyboardDelete();
     }
 
     bindFocusCell() {
@@ -55,6 +61,16 @@ export default class CellManager {
                 this.activateEditing(this.$focusedCell);
             } else if (this.$editingCell) {
                 // enter keypress on editing cell
+                this.deactivateEditing();
+            }
+        });
+    }
+
+    // add by dengqiuhua
+    bindClickEventListeners() {
+        document.addEventListener('click', (event) => {
+            // is target inside container
+            if (this.bodyScrollable && !this.bodyScrollable.contains(event.target)) {
                 this.deactivateEditing();
             }
         });
@@ -135,6 +151,34 @@ export default class CellManager {
                 this.keyboard.on(`shift+${direction}`, () => this.selectArea(getNextSelectionCursor(direction))));
     }
 
+    // by dengqiuhua
+    bindKeyboardDelete() {
+        this.$lastDeleteCell = null;
+        this.keyboard.on('delete', (e) => {
+            if (!this.$focusedCell) return;
+            const {
+                rowIndex,
+                colIndex
+            } = $.data(this.$focusedCell);
+            const cell = this.getCell(colIndex, rowIndex);
+            this.$lastDeleteCell = JSON.parse(JSON.stringify(cell));
+            this.updateCell(colIndex, rowIndex, '', true);
+            e.preventDefault();
+        });
+
+        // undo
+        this.keyboard.on('ctrl+z', (e) => {
+            if (!this.$lastDeleteCell) return;
+            const {
+                rowIndex,
+                colIndex,
+                content
+            } = this.$lastDeleteCell;
+            this.updateCell(colIndex, rowIndex, content, true);
+            e.preventDefault();
+        });
+    }
+
     bindCopyCellContents() {
         this.keyboard.on('ctrl+c', () => {
             const noOfCellsCopied = this.copyCellContents(this.$focusedCell, this.$selectionCursor);
@@ -149,6 +193,13 @@ export default class CellManager {
 
         if (this.options.pasteFromClipboard) {
             this.keyboard.on('ctrl+v', (e) => {
+                const {
+                    rowIndex,
+                    colIndex
+                } = $.data(this.$focusedCell);
+                const cell = this.getCell(colIndex, rowIndex);
+                this.$lastDeleteCell = JSON.parse(JSON.stringify(cell));
+
                 // hack
                 // https://stackoverflow.com/a/2177059/5353542
                 this.instance.pasteTarget.focus();
@@ -161,6 +212,24 @@ export default class CellManager {
 
                 return false;
             });
+
+            // paste image, by dengqiuhua
+            this.instance.pasteTarget.addEventListener('paste', (e) => {
+                const blob = extractImageFromClipboard(e);
+                if (!blob) return;
+                const {
+                    rowIndex,
+                    colIndex
+                } = $.data(this.$focusedCell);
+                const oldCell = this.getCell(colIndex, rowIndex);
+                this.$lastDeleteCell = JSON.parse(JSON.stringify(oldCell));
+
+                const img = blobToImageTag(blob);
+                this.pasteContentInCell(img);
+                const cell = this.getCell(colIndex, rowIndex);
+                this.fireEvent('onImagePaste', blob, cell);
+                e.preventDefault();
+            });
         }
     }
 
@@ -169,6 +238,12 @@ export default class CellManager {
 
         $.on(this.bodyScrollable, 'mousedown', '.dt-cell', (e) => {
             mouseDown = true;
+            // prevent input blur, add by dengqiuhua
+            const cell = $(e.delegatedTarget);
+            const hasEditor = cell.querySelector('.dt-input') !== null;
+            if (hasEditor) {
+                return;
+            }
             this.focusCell($(e.delegatedTarget));
         });
 
@@ -218,7 +293,7 @@ export default class CellManager {
     } = {}) {
         if (!$cell) return;
 
-        // don't focus if already editing cell, 没必要了
+        // don't focus if already editing cell, remove by dengqiuhua
         // if ($cell === this.$editingCell) return;
 
         const {
@@ -485,6 +560,11 @@ export default class CellManager {
 
         if (!this.$editingCell) return;
         this.$editingCell.classList.remove('dt-cell--editing');
+        // remove input when blur, by dengqiuhua
+        const editorInput = this.$editingCell.querySelector('.dt-input');
+        if (editorInput) {
+            editorInput.remove();
+        }
         this.$editingCell = null;
     }
 
@@ -492,9 +572,10 @@ export default class CellManager {
         const column = this.datamanager.getColumn(colIndex);
         const row = this.datamanager.getRow(rowIndex);
         const data = this.datamanager.getData(rowIndex);
+        // add getEditor, by dengqiuhua
         let editor = this.options.getEditor ?
             this.options.getEditor(colIndex, rowIndex, value, parent, column, row, data) :
-            this.getDefaultEditor(parent);
+            getEditor(parent, column);
 
         if (editor === false) {
             // explicitly returned false
@@ -665,7 +746,7 @@ export default class CellManager {
             content: value
         });
         this.refreshCell(cell, refreshHtml);
-        //单元格更新事件
+        // add update event by dengqiuhua
         let row = this.datamanager.getData(rowIndex);
         this.fireEvent('onCellUpdated', colIndex, rowIndex, value, row);
     }

@@ -76,6 +76,35 @@ export function copyTextToClipboard(text) {
     document.body.removeChild(textArea);
 }
 
+// add by dengqiuhua
+export function extractImageFromClipboard(e) {
+    const items = e.clipboardData ? e.clipboardData.items.length > 0 ?
+        e.clipboardData.items : e.clipboardData.files : null;
+
+    if (!items || items.length === 0) return null;
+    for (const item of items) {
+        if (/^image\//.test(item.type)) {
+            return item.getAsFile();
+        }
+    }
+    return null;
+}
+
+export function blobToImage(blob) {
+    const url = URL.createObjectURL(blob);
+    const img = document.createElement('img');
+    img.src = url;
+    document.body.appendChild(img);
+    // release Object
+    img.onload = () => URL.revokeObjectURL(url);
+    return img;
+}
+
+export function blobToImageTag(blob) {
+    const url = URL.createObjectURL(blob);
+    return `<img src="${url}" style="max-height: 100%;" />`;
+}
+
 export function isNumeric(val) {
     return !isNaN(val);
 }
