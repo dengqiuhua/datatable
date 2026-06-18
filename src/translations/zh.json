@@ -1,0 +1,18 @@
+{
+	"Sort Ascending": "升序排列",
+	"Sort Descending": "降序排列",
+	"Reset sorting": "重置排序",
+	"Remove column": "删除列",
+	"Freeze": "冻结",
+	"Unfreeze": "取消冻结",
+	"No Data": "无数据",
+	"{count} cells copied": {
+		"1": "已复制{count} 个单元格",
+		"default": "已复制{count} 个单元格"
+	},
+	"{count} rows selected": {
+		"1": "已选择 {count} 行",
+		"default": "已选择 {count} 行"
+	}
+}
+

@@ -86,6 +86,7 @@ export default function getDefaultOptions(instance) {
         showTotalRow: false,
         direction: 'ltr',
         disableReorderColumn: false,
-        clearColumnEnable: true
+        clearColumnEnable: true,
+        language: 'en',
     };
 };
