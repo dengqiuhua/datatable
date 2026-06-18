@@ -30,6 +30,7 @@ export default class CellManager {
         ]);
 
         this.bindEvents();
+        this.MAX_UNDO_LEVELS = 12;
     }
 
     bindEvents() {
@@ -153,27 +154,33 @@ export default class CellManager {
 
     // by dengqiuhua
     bindKeyboardDelete() {
-        this.$lastDeleteCell = null;
-        this.keyboard.on('delete', (e) => {
-            if (!this.$focusedCell) return;
-            const {
-                rowIndex,
-                colIndex
-            } = $.data(this.$focusedCell);
-            const cell = this.getCell(colIndex, rowIndex);
-            this.$lastDeleteCell = JSON.parse(JSON.stringify(cell));
-            this.updateCell(colIndex, rowIndex, '', true);
-            e.preventDefault();
-        });
+        if (!this.$cellUndoStack) this.$cellUndoStack = [];
+        if (this.options.clearColumnEnable) {
+            this.keyboard.on('delete', (e) => {
+                if (!this.$focusedCell) return;
+                const {
+                    rowIndex,
+                    colIndex
+                } = $.data(this.$focusedCell);
+                const cell = this.getCell(colIndex, rowIndex);
+                if (!cell.content) return;
+                if (this.$cellUndoStack.length >= this.MAX_UNDO_LEVELS) this.$cellUndoStack.shift();
+                this.$cellUndoStack.push(JSON.parse(JSON.stringify(cell)));
+                this.updateCell(colIndex, rowIndex, '', true);
+                e.preventDefault();
+            });
+        }
 
         // undo
         this.keyboard.on('ctrl+z', (e) => {
-            if (!this.$lastDeleteCell) return;
+            if (!this.$cellUndoStack || this.$cellUndoStack.length === 0) return;
+            const cell = this.$cellUndoStack.pop();
+            if (!cell || typeof cell !== 'object') return;
             const {
                 rowIndex,
                 colIndex,
                 content
-            } = this.$lastDeleteCell;
+            } = cell;
             this.updateCell(colIndex, rowIndex, content, true);
             e.preventDefault();
         });
@@ -198,7 +205,9 @@ export default class CellManager {
                     colIndex
                 } = $.data(this.$focusedCell);
                 const cell = this.getCell(colIndex, rowIndex);
-                this.$lastDeleteCell = JSON.parse(JSON.stringify(cell));
+                if (!this.$cellUndoStack) this.$cellUndoStack = [];
+                if (this.$cellUndoStack.length >= this.MAX_UNDO_LEVELS) this.$cellUndoStack.shift();
+                this.$cellUndoStack.push(JSON.parse(JSON.stringify(cell)));
 
                 // hack
                 // https://stackoverflow.com/a/2177059/5353542
@@ -222,7 +231,9 @@ export default class CellManager {
                     colIndex
                 } = $.data(this.$focusedCell);
                 const oldCell = this.getCell(colIndex, rowIndex);
-                this.$lastDeleteCell = JSON.parse(JSON.stringify(oldCell));
+                if (!this.$cellUndoStack) this.$cellUndoStack = [];
+                if (this.$cellUndoStack.length >= this.MAX_UNDO_LEVELS) this.$cellUndoStack.shift();
+                this.$cellUndoStack.push(JSON.parse(JSON.stringify(oldCell)));
 
                 const img = blobToImageTag(blob);
                 this.pasteContentInCell(img);

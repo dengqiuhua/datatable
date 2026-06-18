@@ -85,6 +85,7 @@ export default function getDefaultOptions(instance) {
         pasteFromClipboard: false,
         showTotalRow: false,
         direction: 'ltr',
-        disableReorderColumn: false
+        disableReorderColumn: false,
+        clearColumnEnable: true
     };
 };
