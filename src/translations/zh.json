@@ -13,6 +13,8 @@
 	"{count} rows selected": {
 		"1": "已选择 {count} 行",
 		"default": "已选择 {count} 行"
-	}
+	},
+	"Double-click or press enter to edit": "双击或按Enter编辑",
+	"Ctrl+v to paste image": "Ctrl+v粘贴图片"
 }
 

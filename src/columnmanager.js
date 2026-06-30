@@ -4,6 +4,7 @@ import {
     linkProperties,
     debounce
 } from './utils';
+import icons from './icons';
 
 export default class ColumnManager {
     constructor(instance) {
@@ -529,5 +530,16 @@ export default class ColumnManager {
             stickItem.classList.remove('dt-hidden');
             unstickItem.classList.add('dt-hidden');
         }
+    }
+
+    getEditIcon(column) {
+        if (!column) return '';
+        if (!column.isHeader || !column.editable || !this.options.showEditIcon) return '';
+        let title = this.instance.translate('Double-click or press enter to edit');
+        if (column.type === 'image') {
+            title = this.instance.translate('Ctrl+v to paste image');
+            return `<span class="fa fa-edit" title="${title}">${icons.image}</span>`;
+        }
+        return `<span class="fa fa-edit" title="${title}">${icons.edit}</span>`;
     }
 }

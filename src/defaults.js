@@ -88,5 +88,6 @@ export default function getDefaultOptions(instance) {
         disableReorderColumn: false,
         clearColumnEnable: true,
         language: 'en',
+        showEditIcon: true
     };
 };

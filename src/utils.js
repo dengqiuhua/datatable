@@ -90,19 +90,19 @@ export function extractImageFromClipboard(e) {
     return null;
 }
 
-export function blobToImage(blob) {
-    const url = URL.createObjectURL(blob);
+export function getImageUrl(imageFile) {
+    const url = URL.createObjectURL(imageFile);
     const img = document.createElement('img');
     img.src = url;
+    img.width = 1;
+    img.height = 1;
     document.body.appendChild(img);
     // release Object
-    img.onload = () => URL.revokeObjectURL(url);
-    return img;
-}
-
-export function blobToImageTag(blob) {
-    const url = URL.createObjectURL(blob);
-    return `<img src="${url}" style="max-height: 100%;" />`;
+    img.onload = () => {
+        URL.revokeObjectURL(url);
+        img.remove();
+    };
+    return url;
 }
 
 export function isNumeric(val) {

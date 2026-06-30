@@ -13,5 +13,7 @@
 	"{count} rows selected": {
 		"1": "{count} ligne sélectionnée",
 		"default": "{count} lignes sélectionnées"
-	}
+	},
+	"Double-click or press enter to edit": "Double-cliquez ou appuyez sur Enter pour modifier",
+	"Ctrl+v to paste image": "Ctrl+v pour coller une image"
 }

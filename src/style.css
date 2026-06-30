@@ -18,6 +18,9 @@
     --dt-header-cell-bg: var(--dt-cell-bg);
     --dt-no-data-message-width: 90px;
     --dt-scroll-left: 0px;
+    --dt-row-bg: #f7f8fa;
+    --dt-row-hover-bg: #eef1f5;
+    --dt-row-selected-bg: #dceaff;
 }
 
 .datatable {
@@ -34,7 +37,7 @@
 .dt-scrollable {
     height: 40vw;
     overflow: auto;
-    border-top: 2px solid var(--dt-border-color);
+    /* border-top: 2px solid var(--dt-border-color); */  /* has bug for overflow hidden */
 
     &--highlight-all {
         background-color: var(--dt-selection-highlight-color);
@@ -51,7 +54,7 @@
             left: 50px;
             border: none;
             width: var(--dt-no-data-message-width);
-    }
+        }
     }
 }
 
@@ -82,7 +85,7 @@
     position: relative;
     outline: none;
     padding: 0;
-    background-color: var(--dt-cell-bg);
+    /* background-color: var(--dt-cell-bg); */ /* removed by dengqiuhua*/
     color: var(--dt-text-color);
     /*
      Fix for firefox and Edge
@@ -330,4 +333,29 @@
 
 body.dt-resize {
     cursor: col-resize;
+}
+
+.datatable.dt-dark {
+    --dt-border-color: #424242;
+    --dt-light-bg: #2e3538;
+    --dt-text-color: #dfe2e5;
+    --dt-text-light: #dfe2e5;
+    /* --dt-cell-bg: #1c1f20; */
+    --dt-focus-border-width: 1px;
+    --dt-selection-highlight-color: var(--dt-light-bg);
+    --dt-toast-message-border: 1px solid var(--dt-border-color);
+    --dt-header-cell-bg: #262c2e;
+}
+
+.datatable .dt-scrollable .dt-row:hover {
+    background-color: var(--dt-row-hover-bg) !important;
+}
+
+/* striped background color */
+.datatable.dt-striped .dt-scrollable .dt-row:nth-child(even) {
+    background-color: var(--dt-row-bg);
+}
+
+.datatable.dt-striped .dt-scrollable .dt-row.selected {
+    background-color: var(--dt-row-selected-bg) !important;
 }

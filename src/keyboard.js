@@ -16,6 +16,7 @@ const KEYCODES = {
     70: 'f',
     86: 'v',
     90: 'z',
+    45: 'insert',
     46: 'delete'
 };
 

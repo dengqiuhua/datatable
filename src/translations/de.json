@@ -13,5 +13,7 @@
 	"{count} rows selected": {
 		"1": "{count} Zeile ausgewählt",
 		"default": "{count} Zeilen ausgewählt"
-	}
+	},
+	"Double-click or press enter to edit": "Doppelklicken oder Enter drücken, um zu bearbeiten",
+	"Ctrl+v to paste image": "Ctrl+v zum Einfügen des Bildes"
 }

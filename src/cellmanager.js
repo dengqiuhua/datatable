@@ -1,6 +1,6 @@
 import {
     copyTextToClipboard,
-    blobToImageTag,
+    getImageUrl,
     extractImageFromClipboard,
     makeDataAttributeString,
     throttle,
@@ -65,14 +65,22 @@ export default class CellManager {
                 this.deactivateEditing();
             }
         });
+
+        // add by dengqiuhua
+        this.keyboard.on('insert', () => {
+            if (this.$focusedCell && !this.$editingCell) {
+                this.activateEditing(this.$focusedCell);
+            }
+        });
     }
 
     // add by dengqiuhua
     bindClickEventListeners() {
         document.addEventListener('click', (event) => {
             // is target inside container
-            if (this.bodyScrollable && !this.bodyScrollable.contains(event.target)) {
+            if (this.bodyScrollable && this.$focusedCell && !this.bodyScrollable.contains(event.target)) {
                 this.deactivateEditing();
+                this.unfocusCell(this.$focusedCell);
             }
         });
     }
@@ -224,21 +232,23 @@ export default class CellManager {
 
             // paste image, by dengqiuhua
             this.instance.pasteTarget.addEventListener('paste', (e) => {
-                const blob = extractImageFromClipboard(e);
-                if (!blob) return;
                 const {
                     rowIndex,
                     colIndex
                 } = $.data(this.$focusedCell);
-                const oldCell = this.getCell(colIndex, rowIndex);
+                const cell = this.getCell(colIndex, rowIndex);
+                if (!cell.column.type || cell.column.type !== 'image') return;
+
+                const image = extractImageFromClipboard(e);
+                if (!image) return;
                 if (!this.$cellUndoStack) this.$cellUndoStack = [];
                 if (this.$cellUndoStack.length >= this.MAX_UNDO_LEVELS) this.$cellUndoStack.shift();
-                this.$cellUndoStack.push(JSON.parse(JSON.stringify(oldCell)));
+                this.$cellUndoStack.push(JSON.parse(JSON.stringify(cell)));
 
-                const img = blobToImageTag(blob);
-                this.pasteContentInCell(img);
-                const cell = this.getCell(colIndex, rowIndex);
-                this.fireEvent('onImagePaste', blob, cell);
+                const url = getImageUrl(image);
+                this.pasteContentInCell(url);
+                const freshCell = this.getCell(colIndex, rowIndex);
+                this.fireEvent('onImagePaste', image, url, freshCell);
                 e.preventDefault();
             });
         }
@@ -1011,6 +1021,9 @@ export default class CellManager {
             }
         }
 
+        // add by dengqiuhua
+        const editableHTML = isHeader ? this.columnmanager.getEditIcon(cell) : '';
+
         const className = [
             'dt-cell__content',
             isHeader ? `dt-cell__content--header-${colIndex}` : `dt-cell__content--col-${colIndex}`
@@ -1018,6 +1031,7 @@ export default class CellManager {
 
         let cellContentHTML = `
             <div class="${className}">
+                ${editableHTML}
                 ${contentHTML}
                 ${sortIndicator}
                 ${resizeColumn}

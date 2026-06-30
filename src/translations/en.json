@@ -13,5 +13,7 @@
 	"{count} rows selected": {
 		"1": "{count} row selected",
 		"default": "{count} rows selected"
-	}
+	},
+	"Double-click or press enter to edit": "Double-click or press enter to edit",
+	"Ctrl+v to paste image": "Ctrl+v to paste image"
 }

@@ -111,8 +111,17 @@ class DataTable {
     }
 
     prepareDom() {
+        // add by dengqiuhua
+        let tableClass = 'datatable';
+        if (this.options.striped) {
+            tableClass += ' dt-striped';
+        }
+        if (this.options.theme && ['dark', 'light'].includes(this.options.theme)) {
+            tableClass += ' dt-' + this.options.theme;
+        }
+
         this.wrapper.innerHTML = `
-            <div class="datatable" dir="${this.options.direction}">
+            <div class="${tableClass}" dir="${this.options.direction}" >
                 <div class="dt-header"></div>
                 <div class="dt-scrollable"></div>
                 <div class="dt-footer"></div>
